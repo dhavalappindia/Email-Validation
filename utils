@@ -1,0 +1,358 @@
+package utils;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.Window;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+
+
+import com.ai.dailycash.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Utills {
+
+
+    public static ProgressDialog mProgressDialog;
+    //    public static long MINIT_MINLISECOND=60000;
+    public static long HOUR_MINLISECOND = 3600000;   // 1 minit = 60000 milisecond
+
+    public static String TAG = "TAG";
+    private static Dialog dialog;
+    private static double longitute;
+
+    private static double latitude;
+    private static boolean isClick;
+
+    public static boolean emailValidation(String email) {
+        String regExpn = "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+
+        CharSequence inputStr = email;
+
+        Pattern pattern = Pattern.compile(regExpn, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public static boolean isGPSEnable(Context context) {
+        @SuppressWarnings("static-access")
+        LocationManager manager = (LocationManager) context
+                .getSystemService(context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            return false;
+        else
+            return true;
+    }
+
+
+    public static void showSettingsAlert(final Context context, String provider) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+
+        alertDialog.setTitle(provider + " SETTINGS");
+
+        alertDialog.setMessage(provider
+                + " is not enabled! Want to go to settings menu?");
+
+        alertDialog.setPositiveButton("Settings",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(
+                                Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        context.startActivity(intent);
+                    }
+                });
+
+        alertDialog.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialog.show();
+    }
+
+    public static void showAlertDialog(
+            final Context context,
+            String dialogTitle,
+            String dialogMessage,
+            String dialogPositive,
+            String dialogNegative) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+
+        alertDialog.setTitle(dialogTitle);
+
+        alertDialog.setMessage(dialogMessage);
+
+        alertDialog.setPositiveButton(dialogPositive,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+
+//        alertDialog.setNegativeButton(dialogNegative,
+//                new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.cancel();
+//                    }
+//                });
+        alertDialog.show();
+    }
+
+
+    public static String SaveIamge(Bitmap finalBitmap, String name,
+                                   String directoryName) {
+
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/" + directoryName);
+        myDir.mkdirs();
+        String fname = "/" + name;
+        File file = new File(myDir, fname);
+
+        try {
+            file.createNewFile();
+            if (file.exists())
+                file.delete();
+            FileOutputStream out = new FileOutputStream(file);
+            BufferedOutputStream bos = new BufferedOutputStream(out);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bos);
+            out.flush();
+            out.close();
+            return root + "/" + directoryName + fname;
+
+        } catch (FileNotFoundException e) {
+            Log.d("Tag", "Error saving image file: " + e.getMessage());
+            return "";
+        } catch (IOException e) {
+            Log.d("Tag", "Error saving image file: " + e.getMessage());
+            return "";
+        }
+    }
+
+    public static void snackBarLong(View v, String msg) {
+        Snackbar snackbar = Snackbar.make(v, msg, Snackbar.LENGTH_LONG);
+
+        snackbar.show();
+    }
+
+    public static void snackBarLong(View v, String msg, int color) {
+        Snackbar snackbar = Snackbar.make(v, msg, Snackbar.LENGTH_SHORT);
+        View sbView = snackbar.getView();
+        TextView textView = (TextView) sbView
+                .findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.WHITE);
+        sbView.setBackgroundColor(color);
+        snackbar.show();
+    }
+
+//    public static void showSnackBar(View view, String message) {
+//
+//        final Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+//        snackbar.setAction("hide", new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                snackbar.dismiss();
+//            }
+//        });
+//        if (view instanceof FrameLayout) {
+//            View snackbarView = snackbar.getView();
+//            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackbarView.getLayoutParams();
+//            params.gravity = Gravity.BOTTOM;
+//            snackbarView.setLayoutParams(params);
+//        }
+//        ((TextView) snackbar.getView().findViewById(android.support.design.R.id.snackbar_text)).setTextColor(Color.WHITE);
+//
+//        snackbar.setActionTextColor(Color.WHITE);
+//        snackbar.show();
+//    }
+
+    public static boolean isInternetAvailable(Context context) {
+        ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = conMan.getActiveNetworkInfo();
+        if (netInfo != null) {
+            return true;
+        }
+        return false;
+    }
+
+//    public static Location getLatLongFromAddress(JSONObject jsonObject) {
+//        Location mLocation = new Location("");
+//
+//        try {
+//            longitute = ((JSONArray) jsonObject.get("results"))
+//                    .getJSONObject(0).getJSONObject("geometry")
+//                    .getJSONObject("location").getDouble("lng");
+//            latitude = ((JSONArray) jsonObject.get("results")).getJSONObject(0)
+//                    .getJSONObject("geometry").getJSONObject("location")
+//                    .getDouble("lat");
+//        } catch (JSONException e) {
+//            longitute = 0;
+//            latitude = 0;
+//        }
+//        mLocation.setLatitude(latitude);
+//        mLocation.setLongitude(longitute);
+//        return mLocation;
+//    }
+
+
+//    public static boolean isGooglePlayServicesAvailable(Context context) {
+//        int status = GooglePlayServicesUtil
+//                .isGooglePlayServicesAvailable(context);
+//        if (ConnectionResult.SUCCESS == status) {
+//            return true;
+//        } else {
+//            GooglePlayServicesUtil
+//                    .getErrorDialog(status, (Activity) context, 0).show();
+//            return false;
+//        }
+//    }
+
+
+//    public static void GpsEnableDialog(final Context context) {
+//        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+//                context);
+//        alertDialogBuilder.setTitle(context.getString(R.string.app_alert_text));
+//        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+//
+//        alertDialogBuilder
+//                .setMessage(context.getString(R.string.enable_gps))
+//                .setCancelable(false)
+//                .setPositiveButton(context.getString(R.string.yes_text),
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id) {
+//                                context.startActivity(new Intent(action));
+//                                dialog.dismiss();
+//                            }
+//                        })
+//                .setNegativeButton(context.getString(R.string.no_text),
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id) {
+//                                dialog.dismiss();
+//                            }
+//                        });
+//
+//        AlertDialog alertDialog = alertDialogBuilder.create();
+//        alertDialog.show();
+//    }
+
+
+//    public static void showLoadingDialog(Context mContext) {
+//        dialog = new Dialog(mContext);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+////        dialog.setContentView(R.layout.loder);
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+////        dialog.setCancelable(false);
+//        dialog.show();
+//    }
+
+//    public static void dismissLoadingDialog() {
+//
+//        if (dialog != null && dialog.isShowing())
+//            dialog.dismiss();
+//    }
+
+
+//    public static void showLoadingDialog1(Context mContext) {
+//        dialog = new Dialog(mContext);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+////        dialog.setContentView(R.layout.loder);
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//        dialog.setCancelable(false);
+//        dialog.show();
+//    }
+
+    public static void moreAppsPlayStore(Context mContext, String appPackageName) {
+//    appPackageName = moreAppBeen.data.get(pos).redirect_url; // getPackageName() from Context or Activity object
+        try {
+            mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+        }
+
+
+    }
+
+    public static boolean isPackageExisted(Activity activity, String targetPackage) {
+        PackageManager pm = activity.getPackageManager();
+        try {
+            PackageInfo info = pm.getPackageInfo(targetPackage, PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static void showProgressDialog(Activity activity) {
+//        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(activity);
+            mProgressDialog.setMessage(activity.getString(R.string.loading));
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
+//        }
+
+//                dialog = new Dialog(mContext);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        dialog.setContentView(R.layout.loder);
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//        dialog.setCancelable(false);
+//        dialog.show();
+
+        mProgressDialog.show();
+    }
+
+    public static void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
+    }
+
+
+//    public static void animShark(Context context, View v) {
+//        Animation animationShake = AnimationUtils.loadAnimation(context,
+//                R.anim.shake);
+//        v.startAnimation(animationShake);
+//    }
+}
