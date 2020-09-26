@@ -378,5 +378,23 @@ image_more_app.setOnClickListener(new View.OnClickListener() {
                 }
             }
         });
+        
+        
+
+        tv_private_policy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String url = "http://kevalpatel4333.blogspot.com/2018/09/privacy-policy-colour-book-privacy.html";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+            }
+        });
+
+
+    }
+
+
 
 }
